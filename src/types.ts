@@ -11,11 +11,17 @@ export interface CartItem {
   qty: number;
 }
 
+export interface Warning {
+  code: string;
+  message: string;
+}
+
 export interface SimulateResponse {
   subtotal: number;
   discount: number;
   total: number;
   appliedCoupon?: string;
+  warnings?: Warning[];
 }
 
 // Engine module types
@@ -24,4 +30,5 @@ export interface PricingResult {
   discount: number;
   total: number;
   appliedCoupon?: string;
+  warnings?: Warning[];
 }

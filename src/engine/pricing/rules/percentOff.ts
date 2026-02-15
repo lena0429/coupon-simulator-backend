@@ -1,20 +1,38 @@
 import { calculatePercentage } from '../money';
 
+export const SUPPORTED_COUPONS = ['SAVE10'] as const;
+
+export type SupportedCoupon = (typeof SUPPORTED_COUPONS)[number];
+
+export function isSupportedCoupon(code: string): code is SupportedCoupon {
+  return (SUPPORTED_COUPONS as readonly string[]).includes(code);
+}
+
+export interface CouponResult {
+  discount: number;
+  appliedCoupon?: SupportedCoupon;
+}
+
 /**
  * Apply percent-off discount based on coupon code
  * v1: Only supports SAVE10 (10% off)
- * Returns discount amount or 0 if code is unknown
+ * Returns discount amount and applied coupon code (if recognized)
+ *
+ * @param normalizedCode - Already normalized coupon code (uppercase, trimmed)
+ * @param subtotal - Cart subtotal to calculate discount from
  */
-export function applyPercentOff(code: string | undefined, subtotal: number): number {
-  if (!code || code.trim() === '') {
-    return 0;
+export function applyPercentOff(normalizedCode: string | undefined, subtotal: number): CouponResult {
+  if (!normalizedCode || normalizedCode === '') {
+    return { discount: 0 };
   }
-
-  const normalizedCode = code.toUpperCase().trim();
 
   if (normalizedCode === 'SAVE10') {
-    return calculatePercentage(subtotal, 10);
+    const discount = calculatePercentage(subtotal, 10);
+    return {
+      discount,
+      appliedCoupon: discount > 0 ? 'SAVE10' : undefined,
+    };
   }
 
-  return 0;
+  return { discount: 0 };
 }

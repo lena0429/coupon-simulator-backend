@@ -1,6 +1,6 @@
-import { CartItem, PricingResult } from '../../types';
+import { CartItem, PricingResult, Warning } from '../../types';
 import { roundMoney } from './money';
-import { applyPercentOff } from './rules/percentOff';
+import { applyPercentOff, isSupportedCoupon } from './rules/percentOff';
 
 /**
  * Simulate pricing calculation for a cart with optional coupon
@@ -10,18 +10,33 @@ export function simulatePricing(items: CartItem[], couponCode?: string): Pricing
   // Calculate subtotal: sum(price * qty) for all items
   const subtotal = calculateSubtotal(items);
 
+  // Normalize coupon code once (trim + uppercase)
+  const normalizedCode = couponCode?.trim().toUpperCase() || undefined;
+
   // Apply discount if coupon provided
-  const discount = applyPercentOff(couponCode, subtotal);
+  const { discount, appliedCoupon } = applyPercentOff(normalizedCode, subtotal);
 
   // Calculate total
   const total = roundMoney(subtotal - discount);
 
-  // Return result with appliedCoupon if discount was applied
+  // Track warnings
+  const warnings: Warning[] = [];
+
+  // Check if coupon code was provided but not recognized
+  if (normalizedCode && !isSupportedCoupon(normalizedCode)) {
+    warnings.push({
+      code: 'COUPON_UNKNOWN',
+      message: 'Coupon code is not recognized',
+    });
+  }
+
+  // Return result
   return {
     subtotal,
     discount,
     total,
-    appliedCoupon: discount > 0 ? 'SAVE10' : undefined,
+    appliedCoupon,
+    warnings: warnings.length > 0 ? warnings : undefined,
   };
 }
 

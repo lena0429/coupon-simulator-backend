@@ -59,6 +59,7 @@ describe('simulatePricing', () => {
       expect(result.discount).toBe(10);
       expect(result.total).toBe(90);
       expect(result.appliedCoupon).toBe('SAVE10');
+      expect(result.warnings).toBeUndefined();
     });
 
     it('should be case-insensitive for coupon codes', () => {
@@ -90,13 +91,19 @@ describe('simulatePricing', () => {
   });
 
   describe('Unknown coupons', () => {
-    it('should return zero discount for unknown coupon code', () => {
+    it('should return zero discount and warning for unknown coupon code', () => {
       const items: CartItem[] = [
         { id: '1', name: 'Item A', price: 100, qty: 1 },
       ];
       const result = simulatePricing(items, 'INVALID');
       expect(result.discount).toBe(0);
       expect(result.appliedCoupon).toBeUndefined();
+      expect(result.warnings).toEqual([
+        {
+          code: 'COUPON_UNKNOWN',
+          message: 'Coupon code is not recognized',
+        },
+      ]);
     });
 
     it('should handle empty string coupon code', () => {
@@ -115,6 +122,7 @@ describe('simulatePricing', () => {
       const result = simulatePricing(items);
       expect(result.discount).toBe(0);
       expect(result.appliedCoupon).toBeUndefined();
+      expect(result.warnings).toBeUndefined();
     });
   });
 
