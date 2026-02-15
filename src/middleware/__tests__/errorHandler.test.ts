@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from 'vitest';
-import { Request, Response, NextFunction } from 'express';
+import type { Request, Response, NextFunction } from 'express';
 import { ZodError, z } from 'zod';
 import { errorHandler } from '../errorHandler';
 import { AppError } from '../../errors/AppError';
@@ -21,7 +21,7 @@ describe('errorHandler', () => {
         status: vi.fn().mockReturnThis(),
         json: vi.fn(),
       } as unknown as Response;
-      const next = vi.fn() as NextFunction;
+      const next = vi.fn() as unknown as NextFunction;
 
       errorHandler(zodError!, req, res, next);
 
@@ -41,7 +41,7 @@ describe('errorHandler', () => {
         status: vi.fn().mockReturnThis(),
         json: vi.fn(),
       } as unknown as Response;
-      const next = vi.fn() as NextFunction;
+      const next = vi.fn() as unknown as NextFunction;
 
       errorHandler(err, req, res, next);
 
@@ -58,7 +58,7 @@ describe('errorHandler', () => {
         status: vi.fn().mockReturnThis(),
         json: vi.fn(),
       } as unknown as Response;
-      const next = vi.fn() as NextFunction;
+      const next = vi.fn() as unknown as NextFunction;
 
       errorHandler(err, req, res, next);
 
@@ -78,7 +78,7 @@ describe('errorHandler', () => {
         status: vi.fn().mockReturnThis(),
         json: vi.fn(),
       } as unknown as Response;
-      const next = vi.fn() as NextFunction;
+      const next = vi.fn() as unknown as NextFunction;
 
       errorHandler(err, req, res, next);
 
@@ -99,7 +99,7 @@ describe('errorHandler', () => {
         status: vi.fn().mockReturnThis(),
         json: vi.fn(),
       } as unknown as Response;
-      const next = vi.fn() as NextFunction;
+      const next = vi.fn() as unknown as NextFunction;
 
       errorHandler(err, req, res, next);
 
@@ -120,7 +120,7 @@ describe('errorHandler', () => {
         status: vi.fn().mockReturnThis(),
         json: vi.fn(),
       } as unknown as Response;
-      const next = vi.fn() as NextFunction;
+      const next = vi.fn() as unknown as NextFunction;
 
       errorHandler(err, req, res, next);
 
@@ -140,7 +140,7 @@ describe('errorHandler', () => {
         status: vi.fn().mockReturnThis(),
         json: vi.fn(),
       } as unknown as Response;
-      const next = vi.fn() as NextFunction;
+      const next = vi.fn() as unknown as NextFunction;
 
       // Mock console.error to avoid test output pollution
       const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
@@ -163,7 +163,7 @@ describe('errorHandler', () => {
         status: vi.fn().mockReturnThis(),
         json: vi.fn(),
       } as unknown as Response;
-      const next = vi.fn() as NextFunction;
+      const next = vi.fn() as unknown as NextFunction;
 
       const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
 
