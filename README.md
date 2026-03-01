@@ -1,6 +1,6 @@
 # Coupon Simulator Backend
 
-A production-grade Express + TypeScript backend implementing secure coupon simulation with structured logging, type-safe authentication, and role-based access control.
+A production-grade Express + TypeScript backend implementing secure coupon simulation with structured logging, type-safe authentication, and the role-based access control.
 
 ## Key Features
 
