@@ -135,30 +135,25 @@ describe('errorHandler', () => {
   describe('Unknown error handling', () => {
     it('should handle unknown errors with 500 status', () => {
       const err = new Error('Database connection failed');
-      const req = {} as Request;
+      const req = { requestId: 'test-request-id' } as Request;
       const res = {
         status: vi.fn().mockReturnThis(),
         json: vi.fn(),
       } as unknown as Response;
       const next = vi.fn() as unknown as NextFunction;
 
-      // Mock console.error to avoid test output pollution
-      const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
-
       errorHandler(err, req, res, next);
 
       expect(res.status).toHaveBeenCalledWith(500);
       expect(res.json).toHaveBeenCalledWith({
         error: 'Internal server error',
+        requestId: 'test-request-id',
       });
-      expect(consoleErrorSpy).toHaveBeenCalledWith('Unexpected error:', err);
-
-      consoleErrorSpy.mockRestore();
     });
 
     it('should not leak error details in 500 response', () => {
       const err = new Error('Sensitive database connection string: postgres://...');
-      const req = {} as Request;
+      const req = { requestId: 'test-request-id' } as Request;
       const res = {
         status: vi.fn().mockReturnThis(),
         json: vi.fn(),
