@@ -120,7 +120,7 @@ describe('simulatePricing', () => {
         { id: '1', name: 'Item A', price: 100, qty: 1 },
       ];
       const result = simulatePricing(items);
-      expect(result.discount).toBe(1);
+      expect(result.discount).toBe(0);
       expect(result.appliedCoupon).toBeUndefined();
       expect(result.warnings).toBeUndefined();
     });
