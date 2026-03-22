@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.4.0](https://github.com/lena0429/coupon-simulator-backend/compare/coupon-simulator-backend-v0.3.0...coupon-simulator-backend-v0.4.0) (2026-03-22)
+
+
+### Features
+
+* **agent:** implement minimal AI agent orchestration layer (v0.2) ([b12f3b0](https://github.com/lena0429/coupon-simulator-backend/commit/b12f3b09af903b0c70d78fd9db4dbb083cae35f8))
+* **agent:** implement minimal AI agent orchestration layer (v0.2) ([0ad4ec6](https://github.com/lena0429/coupon-simulator-backend/commit/0ad4ec62bf29636a5a51fa83e382b839d8d427af))
+
 ## [0.3.0](https://github.com/lena0429/coupon-simulator-backend/compare/coupon-simulator-backend-v0.2.0...coupon-simulator-backend-v0.3.0) (2026-03-01)
 
 
