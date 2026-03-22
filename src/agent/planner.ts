@@ -49,9 +49,5 @@ const PLANS: Record<AgentIntent, ExecutionPlan['steps']> = {
 
 export function createPlan(request: AgentRequest): ExecutionPlan {
   const intent = detectIntent(request.userRequest);
-
-  return {
-    intent,
-    steps: [...PLANS[intent]],
-  };
+  return { intent, steps: [...PLANS[intent]] };
 }
