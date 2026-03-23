@@ -207,10 +207,138 @@ describe('Case 4: trace correctness', () => {
 });
 
 // ---------------------------------------------------------------------------
-// Case 5 — Unsupported user request
+// Case 5 — Explanation field
 // ---------------------------------------------------------------------------
 
-describe('Case 5: unsupported user request', () => {
+describe('Case 5: explanation field', () => {
+  it('apply_best_coupon_and_simulate_checkout includes explanation with coupon details', async () => {
+    const response = await run(
+      baseRequest({ cartItems: [item('A', 100)], availableCoupons: ['SAVE10'] }),
+    );
+
+    expect(response.explanation).toContain('SAVE10');
+    expect(response.explanation).toContain('$10.00');
+    expect(response.explanation).toContain('$90.00');
+  });
+
+  it('apply_best_coupon_and_simulate_checkout with no valid coupon explains absence', async () => {
+    const response = await run(
+      baseRequest({ availableCoupons: ['BOGUS'] }),
+    );
+
+    expect(response.explanation).toBe('No valid coupon available.');
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Case 6 — simulate_checkout_without_coupon intent
+// ---------------------------------------------------------------------------
+
+describe('Case 6: simulate_checkout_without_coupon intent', () => {
+  it('resolves to the correct intent', async () => {
+    const response = await run(
+      baseRequest({ userRequest: 'Simulate checkout without coupon' }),
+    );
+
+    expect(response.intent).toBe('simulate_checkout_without_coupon');
+  });
+
+  it('chosenCoupon is null even when coupons are available', async () => {
+    const response = await run(
+      baseRequest({
+        userRequest: 'Simulate checkout without coupon',
+        availableCoupons: ['SAVE10'],
+      }),
+    );
+
+    expect(response.chosenCoupon).toBeNull();
+  });
+
+  it('applies no discount', async () => {
+    const response = await run(
+      baseRequest({
+        userRequest: 'Simulate checkout without coupon',
+        cartItems: [item('A', 100)],
+      }),
+    );
+
+    expect(response.finalResult?.discount).toBe(0);
+    expect(response.finalResult?.total).toBe(100);
+  });
+
+  it('trace contains only get_cart and simulate_checkout', async () => {
+    const response = await run(
+      baseRequest({ userRequest: 'Simulate checkout without coupon' }),
+    );
+
+    const skills = response.trace.steps.map((s) => s.skill);
+    expect(skills).toEqual(['get_cart', 'simulate_checkout']);
+  });
+
+  it('explanation mentions no coupon applied', async () => {
+    const response = await run(
+      baseRequest({ userRequest: 'Simulate checkout without coupon' }),
+    );
+
+    expect(response.explanation).toContain('No coupon applied');
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Case 7 — explain_best_coupon intent
+// ---------------------------------------------------------------------------
+
+describe('Case 7: explain_best_coupon intent', () => {
+  it('resolves to the correct intent', async () => {
+    const response = await run(
+      baseRequest({ userRequest: 'Explain the best coupon for my cart' }),
+    );
+
+    expect(response.intent).toBe('explain_best_coupon');
+  });
+
+  it('selects the best coupon', async () => {
+    const response = await run(
+      baseRequest({
+        userRequest: 'Explain the best coupon for my cart',
+        availableCoupons: ['SAVE10'],
+      }),
+    );
+
+    expect(response.chosenCoupon).toBe('SAVE10');
+  });
+
+  it('explanation contains coupon name, discount, and final total', async () => {
+    const response = await run(
+      baseRequest({
+        userRequest: 'Explain the best coupon for my cart',
+        cartItems: [item('A', 100)],
+        availableCoupons: ['SAVE10'],
+      }),
+    );
+
+    expect(response.explanation).toContain('SAVE10');
+    expect(response.explanation).toContain('$10.00');
+    expect(response.explanation).toContain('$90.00');
+  });
+
+  it('explanation reports no valid coupon when none are available', async () => {
+    const response = await run(
+      baseRequest({
+        userRequest: 'Explain the best coupon for my cart',
+        availableCoupons: ['BOGUS'],
+      }),
+    );
+
+    expect(response.explanation).toBe('No valid coupon found.');
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Case 8 — Unsupported user request
+// ---------------------------------------------------------------------------
+
+describe('Case 8: unsupported user request', () => {
   it('throws for an unrecognized request string', async () => {
     await expect(
       run(baseRequest({ userRequest: 'do something random' })),
