@@ -15,7 +15,11 @@ function getClient(): Anthropic {
   return client;
 }
 
-const SUPPORTED_INTENTS: AgentIntent[] = ['apply_best_coupon_and_simulate_checkout'];
+const SUPPORTED_INTENTS: AgentIntent[] = [
+  'apply_best_coupon_and_simulate_checkout',
+  'simulate_checkout_without_coupon',
+  'explain_best_coupon',
+];
 
 // ---------------------------------------------------------------------------
 // Prompt construction

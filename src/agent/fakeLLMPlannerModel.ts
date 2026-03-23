@@ -4,7 +4,11 @@ import type { AgentIntent, PlannerModel, PlannerModelOutput } from './types';
 // Prompt construction
 // ---------------------------------------------------------------------------
 
-const SUPPORTED_INTENTS: AgentIntent[] = ['apply_best_coupon_and_simulate_checkout'];
+const SUPPORTED_INTENTS: AgentIntent[] = [
+  'apply_best_coupon_and_simulate_checkout',
+  'simulate_checkout_without_coupon',
+  'explain_best_coupon',
+];
 
 function buildPrompt(userRequest: string): string {
   return [
@@ -24,8 +28,17 @@ function buildPrompt(userRequest: string): string {
 // Fake LLM response (deterministic — simulates structured model output)
 // ---------------------------------------------------------------------------
 
-// Keyword rules that mirror what a real model would be trained to recognise
+// Keyword rules that mirror what a real model would be trained to recognise.
+// More specific patterns first to avoid false matches.
 const INTENT_PATTERNS: { intent: AgentIntent; keywords: string[][] }[] = [
+  {
+    intent: 'explain_best_coupon',
+    keywords: [['explain', 'why'], ['coupon', 'discount']],
+  },
+  {
+    intent: 'simulate_checkout_without_coupon',
+    keywords: [['checkout', 'simulate'], ['no coupon', 'without']],
+  },
   {
     intent: 'apply_best_coupon_and_simulate_checkout',
     keywords: [['best coupon'], ['checkout', 'simulate']],

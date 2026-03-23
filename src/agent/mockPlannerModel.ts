@@ -6,6 +6,14 @@ import type { AgentIntent, PlannerModel, PlannerModelOutput } from './types';
 
 const INTENT_PATTERNS: { intent: AgentIntent; keywords: string[][] }[] = [
   {
+    intent: 'explain_best_coupon',
+    keywords: [['explain', 'why'], ['coupon', 'discount']],
+  },
+  {
+    intent: 'simulate_checkout_without_coupon',
+    keywords: [['checkout', 'simulate'], ['no coupon', 'without']],
+  },
+  {
     intent: 'apply_best_coupon_and_simulate_checkout',
     // All groups must match (AND); each group is an OR of alternatives
     keywords: [['best coupon'], ['checkout', 'simulate']],

@@ -1,5 +1,6 @@
 import { getSkill } from './registry';
 import type {
+  AgentIntent,
   AgentRequest,
   AgentResponse,
   ExecutionPlan,
@@ -116,23 +117,81 @@ function executeBestCouponAndCheckout(
   return { chosenCoupon, finalResult };
 }
 
+function executeCheckoutWithoutCoupon(
+  request: AgentRequest,
+  steps: StepTrace[],
+): Pick<AgentResponse, 'chosenCoupon' | 'finalResult'> {
+  const cartInput: GetCartInput = { items: request.cartItems };
+  const cart = callSkillWithTrace<GetCartInput, GetCartOutput>('get_cart', cartInput, steps);
+
+  const checkoutInput: SimulateCheckoutInput = { items: cart.items };
+  const finalResult = callSkillWithTrace<SimulateCheckoutInput, SimulateCheckoutOutput>(
+    'simulate_checkout',
+    checkoutInput,
+    steps,
+  );
+
+  return { chosenCoupon: null, finalResult };
+}
+
+// ---------------------------------------------------------------------------
+// Explanation generation (deterministic — derived from execution results)
+// ---------------------------------------------------------------------------
+
+function fmt(n: number): string {
+  return `$${n.toFixed(2)}`;
+}
+
+function generateExplanation(
+  intent: AgentIntent,
+  chosenCoupon: string | null,
+  finalResult: SimulateCheckoutOutput | null,
+): string | null {
+  switch (intent) {
+    case 'simulate_checkout_without_coupon':
+      if (!finalResult) return null;
+      return `No coupon applied. Cart total: ${fmt(finalResult.total)}.`;
+
+    case 'apply_best_coupon_and_simulate_checkout':
+      if (!finalResult) return 'No valid coupon available.';
+      return `Applied ${chosenCoupon}: saved ${fmt(finalResult.discount)}. Total: ${fmt(finalResult.total)}.`;
+
+    case 'explain_best_coupon':
+      if (!chosenCoupon || !finalResult) return 'No valid coupon found.';
+      return (
+        `Best coupon: ${chosenCoupon}. ` +
+        `Subtotal: ${fmt(finalResult.subtotal)}, ` +
+        `discount: ${fmt(finalResult.discount)}, ` +
+        `final total: ${fmt(finalResult.total)}.`
+      );
+  }
+}
+
 // ---------------------------------------------------------------------------
 // Public API
 // ---------------------------------------------------------------------------
 
 export function executePlan(plan: ExecutionPlan, request: AgentRequest): AgentResponse {
   const steps: StepTrace[] = [];
+  let result: Pick<AgentResponse, 'chosenCoupon' | 'finalResult'>;
 
-  if (plan.intent !== 'apply_best_coupon_and_simulate_checkout') {
-    throw new Error(`Unsupported plan intent: "${plan.intent}"`);
+  switch (plan.intent) {
+    case 'apply_best_coupon_and_simulate_checkout':
+    case 'explain_best_coupon':
+      result = executeBestCouponAndCheckout(request, steps);
+      break;
+    case 'simulate_checkout_without_coupon':
+      result = executeCheckoutWithoutCoupon(request, steps);
+      break;
+    default:
+      throw new Error(`Unsupported plan intent: "${plan.intent}"`);
   }
-
-  const { chosenCoupon, finalResult } = executeBestCouponAndCheckout(request, steps);
 
   return {
     intent: plan.intent,
-    chosenCoupon,
-    finalResult,
+    chosenCoupon: result.chosenCoupon,
+    finalResult: result.finalResult,
+    explanation: generateExplanation(plan.intent, result.chosenCoupon, result.finalResult),
     trace: { steps },
   };
 }
