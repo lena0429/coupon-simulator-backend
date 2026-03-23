@@ -1,5 +1,9 @@
 import type { AgentRequest, AgentIntent, ExecutionPlan, PlannerModel } from './types';
+<<<<<<< HEAD
 import { fakeLLMPlannerModel } from './fakeLLMPlannerModel';
+=======
+import { mockPlannerModel } from './mockPlannerModel';
+>>>>>>> origin/main
 
 // ---------------------------------------------------------------------------
 // Plan definitions
