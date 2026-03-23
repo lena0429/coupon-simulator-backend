@@ -1,5 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { runAgent } from '../index';
+import { fakeLLMPlannerModel } from '../fakeLLMPlannerModel';
 import type { AgentRequest } from '../types';
 import type { CartItem } from '../../types';
 
@@ -21,22 +22,25 @@ const baseRequest = (overrides: Partial<AgentRequest> = {}): AgentRequest => ({
   ...overrides,
 });
 
+// All tests inject fakeLLMPlannerModel explicitly to avoid live network calls
+const run = (request: AgentRequest) => runAgent(request, fakeLLMPlannerModel);
+
 // ---------------------------------------------------------------------------
 // Case 1 — Best coupon is selected
 // ---------------------------------------------------------------------------
 
 describe('Case 1: best coupon is selected', () => {
-  it('selects the valid coupon from a mixed list', () => {
-    const response = runAgent(
+  it('selects the valid coupon from a mixed list', async () => {
+    const response = await run(
       baseRequest({ availableCoupons: ['BOGUS', 'SAVE10'] }),
     );
 
     expect(response.chosenCoupon).toBe('SAVE10');
   });
 
-  it('finalResult reflects the discount applied by SAVE10 (10% off)', () => {
+  it('finalResult reflects the discount applied by SAVE10 (10% off)', async () => {
     // cart: $100 → 10% off → discount $10 → total $90
-    const response = runAgent(
+    const response = await run(
       baseRequest({ cartItems: [item('A', 100)], availableCoupons: ['SAVE10'] }),
     );
 
@@ -48,9 +52,9 @@ describe('Case 1: best coupon is selected', () => {
     });
   });
 
-  it('correctly computes totals for a multi-item cart', () => {
+  it('correctly computes totals for a multi-item cart', async () => {
     // 2 × $40 + 1 × $20 = subtotal $100 → SAVE10 → total $90
-    const response = runAgent(
+    const response = await run(
       baseRequest({
         cartItems: [item('A', 40, 2), item('B', 20, 1)],
         availableCoupons: ['SAVE10'],
@@ -68,8 +72,8 @@ describe('Case 1: best coupon is selected', () => {
 // ---------------------------------------------------------------------------
 
 describe('Case 2: invalid coupons are skipped', () => {
-  it('records invalid coupons with status skipped in trace', () => {
-    const response = runAgent(
+  it('records invalid coupons with status skipped in trace', async () => {
+    const response = await run(
       baseRequest({ availableCoupons: ['FAKE1', 'SAVE10', 'FAKE2'] }),
     );
 
@@ -85,8 +89,8 @@ describe('Case 2: invalid coupons are skipped', () => {
     expect(skippedInputs).toContain('FAKE2');
   });
 
-  it('does not choose an invalid coupon', () => {
-    const response = runAgent(
+  it('does not choose an invalid coupon', async () => {
+    const response = await run(
       baseRequest({ availableCoupons: ['FAKE1', 'SAVE10'] }),
     );
 
@@ -94,8 +98,8 @@ describe('Case 2: invalid coupons are skipped', () => {
     expect(response.chosenCoupon).not.toBe('FAKE1');
   });
 
-  it('does not call apply_coupon or simulate_checkout for skipped coupons', () => {
-    const response = runAgent(
+  it('does not call apply_coupon or simulate_checkout for skipped coupons', async () => {
+    const response = await run(
       baseRequest({ availableCoupons: ['FAKE1', 'FAKE2'] }),
     );
 
@@ -112,24 +116,24 @@ describe('Case 2: invalid coupons are skipped', () => {
 // ---------------------------------------------------------------------------
 
 describe('Case 3: no valid coupon', () => {
-  it('returns chosenCoupon = null', () => {
-    const response = runAgent(
+  it('returns chosenCoupon = null', async () => {
+    const response = await run(
       baseRequest({ availableCoupons: ['NOPE', 'INVALID'] }),
     );
 
     expect(response.chosenCoupon).toBeNull();
   });
 
-  it('returns finalResult = null', () => {
-    const response = runAgent(
+  it('returns finalResult = null', async () => {
+    const response = await run(
       baseRequest({ availableCoupons: ['NOPE', 'INVALID'] }),
     );
 
     expect(response.finalResult).toBeNull();
   });
 
-  it('still records validation attempts in trace', () => {
-    const response = runAgent(
+  it('still records validation attempts in trace', async () => {
+    const response = await run(
       baseRequest({ availableCoupons: ['NOPE', 'INVALID'] }),
     );
 
@@ -141,8 +145,8 @@ describe('Case 3: no valid coupon', () => {
     expect(validationSteps.every((s) => s.status === 'skipped')).toBe(true);
   });
 
-  it('returns the correct intent even when no coupon applies', () => {
-    const response = runAgent(
+  it('returns the correct intent even when no coupon applies', async () => {
+    const response = await run(
       baseRequest({ availableCoupons: [] }),
     );
 
@@ -155,16 +159,16 @@ describe('Case 3: no valid coupon', () => {
 // ---------------------------------------------------------------------------
 
 describe('Case 4: trace correctness', () => {
-  it('trace starts with a successful get_cart step', () => {
-    const response = runAgent(baseRequest());
+  it('trace starts with a successful get_cart step', async () => {
+    const response = await run(baseRequest());
 
     const first = response.trace.steps[0];
     expect(first.skill).toBe('get_cart');
     expect(first.status).toBe('success');
   });
 
-  it('trace includes validate_coupon, apply_coupon, and simulate_checkout for a valid coupon', () => {
-    const response = runAgent(
+  it('trace includes validate_coupon, apply_coupon, and simulate_checkout for a valid coupon', async () => {
+    const response = await run(
       baseRequest({ availableCoupons: ['SAVE10'] }),
     );
 
@@ -174,8 +178,8 @@ describe('Case 4: trace correctness', () => {
     expect(skills).toContain('simulate_checkout');
   });
 
-  it('all completed steps have status success', () => {
-    const response = runAgent(
+  it('all completed steps have status success', async () => {
+    const response = await run(
       baseRequest({ availableCoupons: ['SAVE10'] }),
     );
 
@@ -183,8 +187,8 @@ describe('Case 4: trace correctness', () => {
     expect(completed.every((s) => s.status === 'success')).toBe(true);
   });
 
-  it('trace step outputs are non-null for successful steps', () => {
-    const response = runAgent(
+  it('trace step outputs are non-null for successful steps', async () => {
+    const response = await run(
       baseRequest({ availableCoupons: ['SAVE10'] }),
     );
 
@@ -192,8 +196,8 @@ describe('Case 4: trace correctness', () => {
     expect(successSteps.every((s) => s.output !== null)).toBe(true);
   });
 
-  it('trace step order is: get_cart → validate_coupon → apply_coupon → simulate_checkout', () => {
-    const response = runAgent(
+  it('trace step order is: get_cart → validate_coupon → apply_coupon → simulate_checkout', async () => {
+    const response = await run(
       baseRequest({ availableCoupons: ['SAVE10'] }),
     );
 
@@ -207,9 +211,9 @@ describe('Case 4: trace correctness', () => {
 // ---------------------------------------------------------------------------
 
 describe('Case 5: unsupported user request', () => {
-  it('throws for an unrecognized request string', () => {
-    expect(() =>
-      runAgent(baseRequest({ userRequest: 'do something random' })),
-    ).toThrow('Unsupported request');
+  it('throws for an unrecognized request string', async () => {
+    await expect(
+      run(baseRequest({ userRequest: 'do something random' })),
+    ).rejects.toThrow('Unsupported request');
   });
 });

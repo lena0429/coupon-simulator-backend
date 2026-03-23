@@ -1,9 +1,12 @@
 import { createPlan } from './planner';
 import { executePlan } from './executor';
-import type { AgentRequest, AgentResponse } from './types';
+import type { AgentRequest, AgentResponse, PlannerModel } from './types';
 
-export function runAgent(request: AgentRequest): AgentResponse {
-  const plan = createPlan(request);
+export async function runAgent(
+  request: AgentRequest,
+  model?: PlannerModel,
+): Promise<AgentResponse> {
+  const plan = await createPlan(request, model);
   return executePlan(plan, request);
 }
 
