@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.6.0](https://github.com/lena0429/coupon-simulator-backend/compare/coupon-simulator-backend-v0.5.0...coupon-simulator-backend-v0.6.0) (2026-03-23)
+
+
+### Features
+
+* **agent:** integrate real LLM-backed planner model (v0.4) ([d816731](https://github.com/lena0429/coupon-simulator-backend/commit/d816731226ff622e6ea86145b2415c11e155d3e7))
+* **agent:** integrate real LLM-backed planner model (v0.4) ([421ae00](https://github.com/lena0429/coupon-simulator-backend/commit/421ae00c4338359b2b13c47192c00785e3823666))
+
 ## [0.5.0](https://github.com/lena0429/coupon-simulator-backend/compare/coupon-simulator-backend-v0.4.0...coupon-simulator-backend-v0.5.0) (2026-03-23)
 
 
