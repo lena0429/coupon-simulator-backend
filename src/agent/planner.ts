@@ -1,5 +1,5 @@
 import type { AgentRequest, AgentIntent, ExecutionPlan, PlannerModel } from './types';
-import { mockPlannerModel } from './mockPlannerModel';
+import { fakeLLMPlannerModel } from './fakeLLMPlannerModel';
 
 // ---------------------------------------------------------------------------
 // Plan definitions
@@ -20,10 +20,13 @@ const PLANS: Record<AgentIntent, ExecutionPlan['steps']> = {
 
 /**
  * Produces an ExecutionPlan from a natural language request.
- * Delegates intent resolution to the provided model (defaults to mock).
- * Swap `model` for a real LLM implementation without touching executor or skills.
+ * Delegates intent resolution to the provided model (defaults to fakeLLMPlannerModel).
+ * Swap `model` for a real LLM-backed implementation without touching executor or skills.
  */
-export function createPlan(request: AgentRequest, model: PlannerModel = mockPlannerModel): ExecutionPlan {
+export function createPlan(
+  request: AgentRequest,
+  model: PlannerModel = fakeLLMPlannerModel,
+): ExecutionPlan {
   const { intent } = model.resolve(request.userRequest);
 
   return {
