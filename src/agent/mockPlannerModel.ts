@@ -30,7 +30,7 @@ function matchesAllGroups(text: string, groups: string[][]): boolean {
  * Replace with a real LLM implementation to enable AI-driven planning.
  */
 export const mockPlannerModel: PlannerModel = {
-  resolve(userRequest: string): PlannerModelOutput {
+  async resolve(userRequest: string): Promise<PlannerModelOutput> {
     const text = normalise(userRequest);
 
     for (const { intent, keywords } of INTENT_PATTERNS) {

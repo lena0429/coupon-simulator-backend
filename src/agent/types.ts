@@ -52,7 +52,7 @@ export interface PlannerModelOutput {
  * Can be rule-based, fake-LLM, or a real LLM — the planner doesn't care.
  */
 export interface PlannerModel {
-  resolve(userRequest: string): PlannerModelOutput;
+  resolve(userRequest: string): Promise<PlannerModelOutput>;
 }
 
 export interface AgentResponse {

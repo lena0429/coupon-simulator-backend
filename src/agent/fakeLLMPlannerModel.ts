@@ -92,7 +92,7 @@ function parseResponse(raw: string, userRequest: string): PlannerModelOutput {
  * Replace with a real LLM-backed implementation when ready.
  */
 export const fakeLLMPlannerModel: PlannerModel = {
-  resolve(userRequest: string): PlannerModelOutput {
+  async resolve(userRequest: string): Promise<PlannerModelOutput> {
     void buildPrompt(userRequest);              // represents what a real LLM would receive
     const raw = simulateResponse(userRequest);  // fake response derived from original request only
     return parseResponse(raw, userRequest);

@@ -23,11 +23,11 @@ const PLANS: Record<AgentIntent, ExecutionPlan['steps']> = {
  * Delegates intent resolution to the provided model (defaults to fakeLLMPlannerModel).
  * Swap `model` for a real LLM-backed implementation without touching executor or skills.
  */
-export function createPlan(
+export async function createPlan(
   request: AgentRequest,
   model: PlannerModel = fakeLLMPlannerModel,
-): ExecutionPlan {
-  const { intent } = model.resolve(request.userRequest);
+): Promise<ExecutionPlan> {
+  const { intent } = await model.resolve(request.userRequest);
 
   return {
     intent,
