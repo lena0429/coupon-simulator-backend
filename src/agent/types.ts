@@ -38,6 +38,27 @@ export interface ExecutionTrace {
   steps: StepTrace[];
 }
 
+// ---------------------------------------------------------------------------
+// Planner model interface
+// ---------------------------------------------------------------------------
+
+/**
+ * Structured output returned by a PlannerModel.
+ * Keeps the contract explicit so a real LLM implementation can be swapped in
+ * without changing the planner or executor.
+ */
+export interface PlannerModelOutput {
+  intent: AgentIntent;
+}
+
+/**
+ * A PlannerModel resolves a natural language request into structured planning
+ * data. Implementations can be rule-based (mock) or LLM-backed.
+ */
+export interface PlannerModel {
+  resolve(userRequest: string): PlannerModelOutput;
+}
+
 export interface AgentResponse {
   intent: AgentIntent;
   chosenCoupon: string | null;
