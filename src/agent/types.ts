@@ -38,6 +38,23 @@ export interface ExecutionTrace {
   steps: StepTrace[];
 }
 
+// ---------------------------------------------------------------------------
+// Planner model interface
+// ---------------------------------------------------------------------------
+
+/** Structured output a PlannerModel must return. */
+export interface PlannerModelOutput {
+  intent: AgentIntent;
+}
+
+/**
+ * Contract for any planner model implementation.
+ * Can be rule-based, fake-LLM, or a real LLM — the planner doesn't care.
+ */
+export interface PlannerModel {
+  resolve(userRequest: string): PlannerModelOutput;
+}
+
 export interface AgentResponse {
   intent: AgentIntent;
   chosenCoupon: string | null;
