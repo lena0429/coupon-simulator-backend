@@ -22,6 +22,12 @@ const PLANS: Record<AgentIntent, ExecutionPlan['steps']> = {
     { skill: 'apply_coupon', description: 'Apply each valid coupon to the cart' },
     { skill: 'simulate_checkout', description: 'Simulate checkout with each valid coupon' },
   ],
+  compare_coupons: [
+    { skill: 'get_cart', description: 'Retrieve cart summary' },
+    { skill: 'validate_coupon', description: 'Validate each available coupon' },
+    { skill: 'apply_coupon', description: 'Apply each valid coupon to the cart' },
+    { skill: 'simulate_checkout', description: 'Simulate checkout with each valid coupon' },
+  ],
 };
 
 // ---------------------------------------------------------------------------

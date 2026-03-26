@@ -14,6 +14,10 @@ const INTENT_PATTERNS: { intent: AgentIntent; keywords: string[][] }[] = [
     keywords: [['checkout', 'simulate'], ['no coupon', 'without']],
   },
   {
+    intent: 'compare_coupons',
+    keywords: [['compare', 'comparison'], ['coupon', 'coupons', 'discount', 'discounts']],
+  },
+  {
     intent: 'apply_best_coupon_and_simulate_checkout',
     // All groups must match (AND); each group is an OR of alternatives
     keywords: [['best coupon'], ['checkout', 'simulate']],
