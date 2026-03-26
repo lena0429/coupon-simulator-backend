@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.7.0](https://github.com/lena0429/coupon-simulator-backend/compare/coupon-simulator-backend-v0.6.0...coupon-simulator-backend-v0.7.0) (2026-03-26)
+
+
+### Features
+
+* **agent:** preserve per-coupon executor results for future compare … ([92d2a25](https://github.com/lena0429/coupon-simulator-backend/commit/92d2a25d58f8f9787033fbb0460eaba60c140cf8))
+* **agent:** preserve per-coupon executor results for future compare flow ([8decce2](https://github.com/lena0429/coupon-simulator-backend/commit/8decce29edb3a07f27ca0e4c753eee1964e127a0))
+
 ## [0.6.0](https://github.com/lena0429/coupon-simulator-backend/compare/coupon-simulator-backend-v0.5.0...coupon-simulator-backend-v0.6.0) (2026-03-23)
 
 
