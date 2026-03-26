@@ -3,6 +3,7 @@ import type {
   AgentIntent,
   AgentRequest,
   AgentResponse,
+  CompareResult,
   ExecutionPlan,
   SkillName,
   StepTrace,
@@ -204,12 +205,28 @@ function generateExplanation(
 export function executePlan(plan: ExecutionPlan, request: AgentRequest): AgentResponse {
   const steps: StepTrace[] = [];
   let result: Pick<AgentResponse, 'chosenCoupon' | 'finalResult'>;
+  let compare: CompareResult | undefined;
 
   switch (plan.intent) {
-    case 'compare_coupons':
+    case 'compare_coupons': {
+      const { chosenCoupon, finalResult, couponResults } = executeBestCouponAndCheckout(
+        request,
+        steps,
+      );
+      result = { chosenCoupon, finalResult };
+      compare = {
+        bestCouponCode: chosenCoupon,
+        comparisons: couponResults.map(({ couponCode, isValid, discount, finalPrice }) => ({
+          couponCode,
+          isValid,
+          ...(discount !== undefined && { discount }),
+          ...(finalPrice !== undefined && { finalPrice }),
+        })),
+      };
+      break;
+    }
     case 'apply_best_coupon_and_simulate_checkout':
     case 'explain_best_coupon': {
-      // couponResults collected internally; reserved for future compare-coupons step
       const { chosenCoupon, finalResult } = executeBestCouponAndCheckout(request, steps);
       result = { chosenCoupon, finalResult };
       break;
@@ -227,5 +244,6 @@ export function executePlan(plan: ExecutionPlan, request: AgentRequest): AgentRe
     finalResult: result.finalResult,
     explanation: generateExplanation(plan.intent, result.chosenCoupon, result.finalResult),
     trace: { steps },
+    ...(compare !== undefined && { compare }),
   };
 }
