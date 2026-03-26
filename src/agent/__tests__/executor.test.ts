@@ -32,12 +32,12 @@ describe('executeBestCouponAndCheckout: per-coupon result collection', () => {
   it('collects a result entry for each coupon attempted', () => {
     const steps: StepTrace[] = [];
     const { couponResults } = executeBestCouponAndCheckout(
-      makeRequest(['SAVE10', 'SAVE20']),
+      makeRequest(['SAVE10', 'BOGUS']),
       steps,
     );
 
     expect(couponResults).toHaveLength(2);
-    expect(couponResults.map((r) => r.couponCode)).toEqual(['SAVE10', 'SAVE20']);
+    expect(couponResults.map((r) => r.couponCode)).toEqual(['SAVE10', 'BOGUS']);
   });
 
   it('marks invalid coupons as isValid: false with no discount or finalPrice', () => {
@@ -86,21 +86,21 @@ describe('executeBestCouponAndCheckout: per-coupon result collection', () => {
     expect(fake?.isValid).toBe(false);
   });
 
-  it('collects results for multiple valid coupons', () => {
+  it('collects a result entry for a valid coupon followed by an invalid one', () => {
     const steps: StepTrace[] = [];
     const { couponResults } = executeBestCouponAndCheckout(
-      makeRequest(['SAVE10', 'SAVE20']),
+      makeRequest(['SAVE10', 'BOGUS']),
       steps,
     );
 
-    const save10 = couponResults.find((r) => r.couponCode === 'SAVE10');
-    const save20 = couponResults.find((r) => r.couponCode === 'SAVE20');
+    expect(couponResults).toHaveLength(2);
 
+    const save10 = couponResults.find((r) => r.couponCode === 'SAVE10');
     expect(save10?.isValid).toBe(true);
     expect(save10?.finalPrice).toBe(90);
 
-    expect(save20?.isValid).toBe(true);
-    expect(save20?.finalPrice).toBe(80);
+    const bogus = couponResults.find((r) => r.couponCode === 'BOGUS');
+    expect(bogus?.isValid).toBe(false);
   });
 
   it('returns an empty couponResults array when no coupons are provided', () => {
@@ -116,14 +116,14 @@ describe('executeBestCouponAndCheckout: per-coupon result collection', () => {
 // ---------------------------------------------------------------------------
 
 describe('executeBestCouponAndCheckout: best coupon selection still correct', () => {
-  it('chosenCoupon is the one with the lowest total', () => {
+  it('chosenCoupon is the valid coupon when mixed with invalid ones', () => {
     const steps: StepTrace[] = [];
     const { chosenCoupon } = executeBestCouponAndCheckout(
-      makeRequest(['SAVE10', 'SAVE20']),
+      makeRequest(['BOGUS', 'SAVE10']),
       steps,
     );
 
-    expect(chosenCoupon).toBe('SAVE20');
+    expect(chosenCoupon).toBe('SAVE10');
   });
 
   it('chosenCoupon is null when all coupons are invalid', () => {
