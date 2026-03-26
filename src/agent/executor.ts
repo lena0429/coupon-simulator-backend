@@ -19,6 +19,23 @@ import type {
 } from '../skills/types';
 
 // ---------------------------------------------------------------------------
+// Executor-internal types (not part of the public agent contract)
+// ---------------------------------------------------------------------------
+
+interface CouponResult {
+  couponCode: string;
+  isValid: boolean;
+  discount?: number;
+  finalPrice?: number;
+}
+
+interface BestCouponResult {
+  chosenCoupon: string | null;
+  finalResult: SimulateCheckoutOutput | null;
+  couponResults: CouponResult[];
+}
+
+// ---------------------------------------------------------------------------
 // Helpers
 // ---------------------------------------------------------------------------
 
@@ -61,15 +78,20 @@ function isBetterResult(
 // Intent handlers
 // ---------------------------------------------------------------------------
 
-function executeBestCouponAndCheckout(
+/**
+ * @internal Exported only for unit testing — not part of the public agent API.
+ * Use executePlan for all production code paths.
+ */
+export function executeBestCouponAndCheckout(
   request: AgentRequest,
   steps: StepTrace[],
-): Pick<AgentResponse, 'chosenCoupon' | 'finalResult'> {
+): BestCouponResult {
   const cartInput: GetCartInput = { items: request.cartItems };
   const cart = callSkillWithTrace<GetCartInput, GetCartOutput>('get_cart', cartInput, steps);
 
   let chosenCoupon: string | null = null;
   let finalResult: SimulateCheckoutOutput | null = null;
+  const couponResults: CouponResult[] = [];
 
   for (const coupon of request.availableCoupons) {
     const validateInput: ValidateCouponInput = { couponCode: coupon };
@@ -85,17 +107,16 @@ function executeBestCouponAndCheckout(
       status: validation.isValid ? 'success' : 'skipped',
     });
 
-    if (!validation.isValid) continue;
+    if (!validation.isValid) {
+      couponResults.push({ couponCode: coupon, isValid: false });
+      continue;
+    }
 
     const applyInput: ApplyCouponInput = {
       items: cart.items,
       couponCode: validation.couponCode,
     };
-    const applied = callSkillWithTrace<ApplyCouponInput, ApplyCouponOutput>(
-      'apply_coupon',
-      applyInput,
-      steps,
-    );
+    callSkillWithTrace<ApplyCouponInput, ApplyCouponOutput>('apply_coupon', applyInput, steps);
 
     const checkoutInput: SimulateCheckoutInput = {
       items: cart.items,
@@ -106,15 +127,20 @@ function executeBestCouponAndCheckout(
       checkoutInput,
       steps,
     );
+    couponResults.push({
+      couponCode: validation.couponCode,
+      isValid: true,
+      discount: checkout.discount,
+      finalPrice: checkout.total,
+    });
 
-    void applied; // traced above; comparison uses checkout
     if (isBetterResult(checkout, finalResult)) {
       chosenCoupon = validation.couponCode;
       finalResult = checkout;
     }
   }
 
-  return { chosenCoupon, finalResult };
+  return { chosenCoupon, finalResult, couponResults };
 }
 
 function executeCheckoutWithoutCoupon(
@@ -177,9 +203,12 @@ export function executePlan(plan: ExecutionPlan, request: AgentRequest): AgentRe
 
   switch (plan.intent) {
     case 'apply_best_coupon_and_simulate_checkout':
-    case 'explain_best_coupon':
-      result = executeBestCouponAndCheckout(request, steps);
+    case 'explain_best_coupon': {
+      // couponResults collected internally; reserved for future compare-coupons step
+      const { chosenCoupon, finalResult } = executeBestCouponAndCheckout(request, steps);
+      result = { chosenCoupon, finalResult };
       break;
+    }
     case 'simulate_checkout_without_coupon':
       result = executeCheckoutWithoutCoupon(request, steps);
       break;
