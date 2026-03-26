@@ -98,6 +98,55 @@ describe('compare_coupons: comparison entries', () => {
 });
 
 // ---------------------------------------------------------------------------
+// Full pipeline coherence
+// ---------------------------------------------------------------------------
+
+describe('compare_coupons: full pipeline coherence', () => {
+  it('resolves intent correctly from a natural compare request', async () => {
+    const response = await run(compareRequest({ userRequest: 'Compare available coupons' }));
+    expect(response.intent).toBe('compare_coupons');
+  });
+
+  it('full pipeline: request -> intent -> execution -> structured response', async () => {
+    // Validates that all layers (planner, executor, response shaping) work end-to-end
+    const response = await run({
+      userRequest: 'Compare available coupons',
+      cartItems: [item('A', 100)],
+      availableCoupons: ['SAVE10', 'BOGUS'],
+    });
+
+    expect(response.intent).toBe('compare_coupons');
+    expect(response.chosenCoupon).toBe('SAVE10');
+    expect(response.finalResult).toMatchObject({ subtotal: 100, discount: 10, total: 90 });
+    expect(response.compare?.bestCouponCode).toBe('SAVE10');
+    expect(response.compare?.comparisons).toHaveLength(2);
+  });
+
+  it('chosenCoupon and finalResult are populated alongside compare for a valid coupon', async () => {
+    const response = await run(compareRequest({ availableCoupons: ['SAVE10'] }));
+    expect(response.chosenCoupon).toBe('SAVE10');
+    expect(response.finalResult).not.toBeNull();
+    expect(response.finalResult?.total).toBe(90);
+  });
+
+  it('chosenCoupon and finalResult are null when no valid coupons', async () => {
+    const response = await run(compareRequest({ availableCoupons: ['BOGUS'] }));
+    expect(response.chosenCoupon).toBeNull();
+    expect(response.finalResult).toBeNull();
+  });
+
+  it('compare field is derived from execution results, not a passthrough of internal state', async () => {
+    const response = await run(compareRequest({ availableCoupons: ['SAVE10', 'BOGUS'] }));
+    // compare.comparisons must only contain public-contract fields
+    const entry = response.compare?.comparisons.find((c) => c.couponCode === 'SAVE10');
+    expect(Object.keys(entry!)).toEqual(
+      expect.arrayContaining(['couponCode', 'isValid', 'discount', 'finalPrice']),
+    );
+    expect(Object.keys(entry!).length).toBe(4);
+  });
+});
+
+// ---------------------------------------------------------------------------
 // Non-compare intents are unaffected
 // ---------------------------------------------------------------------------
 
