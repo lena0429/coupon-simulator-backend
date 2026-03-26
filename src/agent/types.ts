@@ -4,7 +4,8 @@ import type { SimulateCheckoutOutput } from '../skills/types';
 export type AgentIntent =
   | 'apply_best_coupon_and_simulate_checkout'
   | 'simulate_checkout_without_coupon'
-  | 'explain_best_coupon';
+  | 'explain_best_coupon'
+  | 'compare_coupons';
 
 export type SkillName =
   | 'get_cart'

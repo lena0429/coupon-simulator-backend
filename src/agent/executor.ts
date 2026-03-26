@@ -190,6 +190,10 @@ function generateExplanation(
         `discount: ${fmt(finalResult.discount)}, ` +
         `final total: ${fmt(finalResult.total)}.`
       );
+
+    case 'compare_coupons':
+      // Explanation shaping for compare_coupons is reserved for a later step.
+      return null;
   }
 }
 
@@ -202,6 +206,7 @@ export function executePlan(plan: ExecutionPlan, request: AgentRequest): AgentRe
   let result: Pick<AgentResponse, 'chosenCoupon' | 'finalResult'>;
 
   switch (plan.intent) {
+    case 'compare_coupons':
     case 'apply_best_coupon_and_simulate_checkout':
     case 'explain_best_coupon': {
       // couponResults collected internally; reserved for future compare-coupons step
