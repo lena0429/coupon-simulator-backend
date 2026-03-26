@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.8.0](https://github.com/lena0429/coupon-simulator-backend/compare/coupon-simulator-backend-v0.7.0...coupon-simulator-backend-v0.8.0) (2026-03-26)
+
+
+### Features
+
+* **agent:** add structured compare-coupons response ([e8d6ee1](https://github.com/lena0429/coupon-simulator-backend/commit/e8d6ee1bbb4ea4f73a69edc0c6cbf294d3700ef7))
+* **agent:** add structured compare-coupons response ([ae278d7](https://github.com/lena0429/coupon-simulator-backend/commit/ae278d70e185f63feca7ab4fc0388d9e5614388c))
+
 ## [0.7.0](https://github.com/lena0429/coupon-simulator-backend/compare/coupon-simulator-backend-v0.6.0...coupon-simulator-backend-v0.7.0) (2026-03-26)
 
 
