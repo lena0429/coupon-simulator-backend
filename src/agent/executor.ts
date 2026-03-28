@@ -4,6 +4,7 @@ import type {
   AgentRequest,
   AgentResponse,
   CompareResult,
+  Explanation,
   ExecutionPlan,
   SkillName,
   StepTrace,
@@ -173,28 +174,63 @@ function generateExplanation(
   intent: AgentIntent,
   chosenCoupon: string | null,
   finalResult: SimulateCheckoutOutput | null,
-): string | null {
+): Explanation | null {
   switch (intent) {
     case 'simulate_checkout_without_coupon':
       if (!finalResult) return null;
-      return `No coupon applied. Cart total: ${fmt(finalResult.total)}.`;
+      return {
+        code: 'no_coupon_requested',
+        summary: `No coupon applied. Cart total: ${fmt(finalResult.total)}.`,
+        details: [
+          { type: 'money', key: 'total', label: 'Cart total', value: finalResult.total },
+        ],
+      };
 
     case 'apply_best_coupon_and_simulate_checkout':
-      if (!finalResult) return 'No valid coupon available.';
-      return `Applied ${chosenCoupon}: saved ${fmt(finalResult.discount)}. Total: ${fmt(finalResult.total)}.`;
+      if (!chosenCoupon || !finalResult) {
+        return { code: 'no_valid_coupon', summary: 'No valid coupon found.' };
+      }
+      return {
+        code: 'best_coupon_applied',
+        summary: `Applied ${chosenCoupon}: saved ${fmt(finalResult.discount)}. Total: ${fmt(finalResult.total)}.`,
+        details: [
+          { type: 'coupon', key: 'appliedCoupon', label: 'Applied coupon', couponCode: chosenCoupon },
+          { type: 'money', key: 'discount', label: 'Saved', value: finalResult.discount },
+          { type: 'money', key: 'total', label: 'Total', value: finalResult.total },
+        ],
+      };
 
     case 'explain_best_coupon':
-      if (!chosenCoupon || !finalResult) return 'No valid coupon found.';
-      return (
-        `Best coupon: ${chosenCoupon}. ` +
-        `Subtotal: ${fmt(finalResult.subtotal)}, ` +
-        `discount: ${fmt(finalResult.discount)}, ` +
-        `final total: ${fmt(finalResult.total)}.`
-      );
+      if (!chosenCoupon || !finalResult) {
+        return { code: 'no_valid_coupon', summary: 'No valid coupon found.' };
+      }
+      return {
+        code: 'best_coupon_applied',
+        summary:
+          `Best coupon: ${chosenCoupon}. ` +
+          `Subtotal: ${fmt(finalResult.subtotal)}, ` +
+          `discount: ${fmt(finalResult.discount)}, ` +
+          `final total: ${fmt(finalResult.total)}.`,
+        details: [
+          { type: 'coupon', key: 'bestCoupon', label: 'Best coupon', couponCode: chosenCoupon },
+          { type: 'money', key: 'subtotal', label: 'Subtotal', value: finalResult.subtotal },
+          { type: 'money', key: 'discount', label: 'Discount', value: finalResult.discount },
+          { type: 'money', key: 'total', label: 'Final total', value: finalResult.total },
+        ],
+      };
 
     case 'compare_coupons':
-      // Explanation shaping for compare_coupons is reserved for a later step.
-      return null;
+      if (!chosenCoupon || !finalResult) {
+        return { code: 'compare_summary', summary: 'No valid coupon found.' };
+      }
+      return {
+        code: 'compare_summary',
+        summary: `Best coupon: ${chosenCoupon}. Final price: ${fmt(finalResult.total)}.`,
+        details: [
+          { type: 'coupon', key: 'bestCoupon', label: 'Best coupon', couponCode: chosenCoupon },
+          { type: 'money', key: 'total', label: 'Final price', value: finalResult.total },
+        ],
+      };
   }
 }
 
