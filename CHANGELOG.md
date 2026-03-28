@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.9.0](https://github.com/lena0429/coupon-simulator-backend/compare/coupon-simulator-backend-v0.8.0...coupon-simulator-backend-v0.9.0) (2026-03-28)
+
+
+### Features
+
+* **v0.6.1:** structure explanation response object ([73eee8e](https://github.com/lena0429/coupon-simulator-backend/commit/73eee8ee0e5bceeff9ddf909f252d317813f1b1c))
+* **v0.6.1:** structure explanation response object ([f698097](https://github.com/lena0429/coupon-simulator-backend/commit/f698097813668b1e774bc74f1bfc129f692338f7))
+
 ## [0.8.0](https://github.com/lena0429/coupon-simulator-backend/compare/coupon-simulator-backend-v0.7.0...coupon-simulator-backend-v0.8.0) (2026-03-26)
 
 
