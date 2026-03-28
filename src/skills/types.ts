@@ -57,6 +57,7 @@ export interface ValidateCouponOutput {
   isValid: boolean;
   couponCode: string;
   discountDescription?: string;
+  message?: string;
 }
 
 // ---------------------------------------------------------------------------

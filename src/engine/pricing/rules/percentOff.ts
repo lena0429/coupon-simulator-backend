@@ -1,6 +1,6 @@
 import { calculatePercentage } from '../money';
 
-export const SUPPORTED_COUPONS = ['SAVE10'] as const;
+export const SUPPORTED_COUPONS = ['SAVE10', 'SAVE5'] as const;
 
 export type SupportedCoupon = (typeof SUPPORTED_COUPONS)[number];
 
@@ -31,6 +31,14 @@ export function applyPercentOff(normalizedCode: string | undefined, subtotal: nu
     return {
       discount,
       appliedCoupon: discount > 0 ? 'SAVE10' : undefined,
+    };
+  }
+
+  if (normalizedCode === 'SAVE5') {
+    const discount = calculatePercentage(subtotal, 5);
+    return {
+      discount,
+      appliedCoupon: discount > 0 ? 'SAVE5' : undefined,
     };
   }
 
