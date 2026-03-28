@@ -1,6 +1,7 @@
 import express, { Application } from 'express';
 import healthRouter from './routes/health';
 import pricingRouter from './routes/pricing';
+import agentRouter from './routes/agent';
 import { notFoundHandler } from './middleware/notFound';
 import { errorHandler } from './middleware/errorHandler';
 import { requestContext } from './middleware/requestContext';
@@ -18,6 +19,7 @@ app.use(express.json());
 // Routes
 app.use('/health', healthRouter);
 app.use('/pricing', pricingRouter);
+app.use('/agent', agentRouter);
 
 // Error handling (must be registered after routes)
 app.use(notFoundHandler);
