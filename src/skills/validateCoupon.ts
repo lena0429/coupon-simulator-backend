@@ -9,6 +9,7 @@ import type { Skill, ValidateCouponInput, ValidateCouponOutput } from './types';
  */
 const COUPON_DESCRIPTIONS: Record<string, string> = {
   SAVE10: '10% off',
+  SAVE5: '5% off',
 };
 
 /**
@@ -39,6 +40,7 @@ export const validateCouponSkill: Skill<ValidateCouponInput, ValidateCouponOutpu
       isValid,
       couponCode: normalized,
       ...(isValid && { discountDescription: COUPON_DESCRIPTIONS[normalized] }),
+      ...(!isValid && { message: 'Invalid coupon' }),
     };
   },
 };

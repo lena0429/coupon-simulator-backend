@@ -91,6 +91,7 @@ export interface CompareEntry {
   isValid: boolean;
   discount?: number;
   finalPrice?: number;
+  message?: string;
 }
 
 export interface CompareResult {

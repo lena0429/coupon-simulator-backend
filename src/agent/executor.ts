@@ -29,6 +29,7 @@ interface CouponResult {
   isValid: boolean;
   discount?: number;
   finalPrice?: number;
+  message?: string;
 }
 
 interface BestCouponResult {
@@ -110,7 +111,7 @@ export function executeBestCouponAndCheckout(
     });
 
     if (!validation.isValid) {
-      couponResults.push({ couponCode: coupon, isValid: false });
+      couponResults.push({ couponCode: coupon, isValid: false, message: validation.message });
       continue;
     }
 
@@ -252,11 +253,12 @@ export function executePlan(plan: ExecutionPlan, request: AgentRequest): AgentRe
       result = { chosenCoupon, finalResult };
       compare = {
         bestCouponCode: chosenCoupon,
-        comparisons: couponResults.map(({ couponCode, isValid, discount, finalPrice }) => ({
+        comparisons: couponResults.map(({ couponCode, isValid, discount, finalPrice, message }) => ({
           couponCode,
           isValid,
           ...(discount !== undefined && { discount }),
           ...(finalPrice !== undefined && { finalPrice }),
+          ...(message !== undefined && { message }),
         })),
       };
       break;
