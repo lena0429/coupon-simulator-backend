@@ -216,9 +216,15 @@ describe('Case 5: explanation field', () => {
       baseRequest({ cartItems: [item('A', 100)], availableCoupons: ['SAVE10'] }),
     );
 
-    expect(response.explanation).toContain('SAVE10');
-    expect(response.explanation).toContain('$10.00');
-    expect(response.explanation).toContain('$90.00');
+    expect(response.explanation?.code).toBe('best_coupon_applied');
+    expect(response.explanation?.summary).toContain('SAVE10');
+    expect(response.explanation?.summary).toContain('$10.00');
+    expect(response.explanation?.summary).toContain('$90.00');
+
+    const details = response.explanation?.details ?? [];
+    expect(details.some((d) => d.type === 'coupon' && d.couponCode === 'SAVE10')).toBe(true);
+    expect(details.some((d) => d.type === 'money' && d.key === 'discount' && d.value === 10)).toBe(true);
+    expect(details.some((d) => d.type === 'money' && d.key === 'total' && d.value === 90)).toBe(true);
   });
 
   it('apply_best_coupon_and_simulate_checkout with no valid coupon explains absence', async () => {
@@ -226,7 +232,8 @@ describe('Case 5: explanation field', () => {
       baseRequest({ availableCoupons: ['BOGUS'] }),
     );
 
-    expect(response.explanation).toBe('No valid coupon available.');
+    expect(response.explanation?.code).toBe('no_valid_coupon');
+    expect(response.explanation?.summary).toBe('No valid coupon found.');
   });
 });
 
@@ -280,7 +287,8 @@ describe('Case 6: simulate_checkout_without_coupon intent', () => {
       baseRequest({ userRequest: 'Simulate checkout without coupon' }),
     );
 
-    expect(response.explanation).toContain('No coupon applied');
+    expect(response.explanation?.code).toBe('no_coupon_requested');
+    expect(response.explanation?.summary).toContain('No coupon applied');
   });
 });
 
@@ -317,9 +325,10 @@ describe('Case 7: explain_best_coupon intent', () => {
       }),
     );
 
-    expect(response.explanation).toContain('SAVE10');
-    expect(response.explanation).toContain('$10.00');
-    expect(response.explanation).toContain('$90.00');
+    expect(response.explanation?.code).toBe('best_coupon_applied');
+    expect(response.explanation?.summary).toContain('SAVE10');
+    expect(response.explanation?.summary).toContain('$10.00');
+    expect(response.explanation?.summary).toContain('$90.00');
   });
 
   it('explanation reports no valid coupon when none are available', async () => {
@@ -330,7 +339,8 @@ describe('Case 7: explain_best_coupon intent', () => {
       }),
     );
 
-    expect(response.explanation).toBe('No valid coupon found.');
+    expect(response.explanation?.code).toBe('no_valid_coupon');
+    expect(response.explanation?.summary).toBe('No valid coupon found.');
   });
 });
 

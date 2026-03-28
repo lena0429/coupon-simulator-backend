@@ -120,6 +120,11 @@ describe('compare_coupons: full pipeline coherence', () => {
     expect(response.finalResult).toMatchObject({ subtotal: 100, discount: 10, total: 90 });
     expect(response.compare?.bestCouponCode).toBe('SAVE10');
     expect(response.compare?.comparisons).toHaveLength(2);
+
+    expect(response.explanation?.code).toBe('compare_summary');
+    const details = response.explanation?.details ?? [];
+    expect(details.some((d) => d.type === 'coupon' && d.couponCode === 'SAVE10')).toBe(true);
+    expect(details.some((d) => d.type === 'money' && d.key === 'total' && d.value === 90)).toBe(true);
   });
 
   it('chosenCoupon and finalResult are populated alongside compare for a valid coupon', async () => {
