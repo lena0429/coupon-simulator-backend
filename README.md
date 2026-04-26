@@ -1,5 +1,7 @@
 # Coupon Simulator Backend
 
+For frontend implementation, please refer to the [frontend repo](https://github.com/yourname/frontend-repo).
+
 A production-grade Express + TypeScript backend implementing secure coupon simulation with structured logging, type-safe authentication, and role-based access control.
 
 ## Key Features
@@ -281,45 +283,6 @@ npm test
 - Rotate API keys regularly
 - Deploy behind HTTPS (nginx, ALB, etc.)
 - Consider adding rate limiting for public-facing deployments
-
-## Release Process
-
-This project uses [Release Please](https://github.com/googleapis/release-please) with
-[Conventional Commits](https://www.conventionalcommits.org/) for fully automated releases.
-
-### How it works
-
-1. **Write commits using Conventional Commits prefixes** in every PR:
-   | Prefix | Effect |
-   |---|---|
-   | `feat: …` | bumps **minor** version (0.x.0) |
-   | `fix: …` | bumps **patch** version (0.0.x) |
-   | `feat!: …` / `BREAKING CHANGE:` | bumps **major** version (x.0.0) |
-   | `chore:`, `docs:`, `refactor:`, `test:` | no version bump |
-
-2. **Merge your PR into `main`.**
-   The Release Please GitHub Actions workflow (`.github/workflows/release-please.yml`)
-   runs automatically and creates or updates a **Release PR** titled
-   `chore(release): <next-version>`.
-
-3. **Review and merge the Release PR** when you are ready to publish.
-   On merge, Release Please automatically:
-   - Bumps the version in `package.json`
-   - Prepends a new section to `CHANGELOG.md`
-   - Creates a `vX.Y.Z` git tag
-   - Publishes a GitHub Release with the changelog notes
-
-> **Note:** The workflow uses `GITHUB_TOKEN`, which is sufficient for creating
-> Release PRs and GitHub Releases. If your branch protection requires a specific
-> code-owner approval, approve the Release PR like any other PR before merging.
-
-## Roadmap
-
-- [x] **CI/CD Pipeline** – GitHub Actions workflow for automated testing and deployment
-- [ ] **Advanced Coupon Rules** – Support for BOGO, tiered discounts, minimum purchase amounts
-- [x] **Automated Releases** – Semantic versioning with changelog generation via Release Please
-- [ ] **API Documentation** – OpenAPI/Swagger spec for interactive endpoint testing
-- [ ] **Performance Monitoring** – Prometheus metrics and distributed tracing
 
 ## License
 
